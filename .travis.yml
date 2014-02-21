@@ -1,0 +1,6 @@
+before_script:
+  - mysql -e 'create database zirgoo_test;'
+
+language: java
+install: mvn install -DskipTests=true
+script: mvn test
