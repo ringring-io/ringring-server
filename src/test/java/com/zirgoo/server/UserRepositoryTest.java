@@ -35,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.subethamail.wiser.Wiser;
@@ -92,10 +93,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                           .accept(MediaType.APPLICATION_JSON_TYPE)
-                          .post(UserResult.class, email);
+                          .post(UserResult.class, requestHash);
 
         // Check if email sent to the user
         MimeMessage message = getLastMail().getMimeMessage();
@@ -114,7 +119,7 @@ public class UserRepositoryTest {
         // Try to register the same email again
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                           .accept(MediaType.APPLICATION_JSON_TYPE)
-                          .post(UserResult.class, email);
+                          .post(UserResult.class, requestHash);
 
         // Should be failed with email already registered exception
         assertEquals(Status.EMAIL_ALREADY_REGISTERED, userResult.getStatus());
@@ -131,10 +136,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email);
+                .post(UserResult.class, requestHash);
 
         // Should be failed with invalid email exception
         assertEquals(Status.INVALID_EMAIL, userResult.getStatus());
@@ -151,10 +160,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email);
+                .post(UserResult.class, requestHash);
 
         // Check if email sent to the user
         MimeMessage message = getLastMail().getMimeMessage();
@@ -191,10 +204,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email);
+                .post(UserResult.class, requestHash);
 
         // User needs to registered
         assertEquals(Status.OKAY, userResult.getStatus());
@@ -240,10 +257,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email1);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email1);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user1 = userResult.getResult();
 
@@ -253,9 +274,12 @@ public class UserRepositoryTest {
         user1.setActivationCode(activationCode1);
 
         // Second email registration
+        requestHash.clear();
+        requestHash.put("email", email2);
+
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email2);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user2 = userResult.getResult();
 
@@ -265,9 +289,12 @@ public class UserRepositoryTest {
         user2.setActivationCode(activationCode2);
 
         // Third email registration
+        requestHash.clear();
+        requestHash.put("email", email3);
+
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email3);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user3 = userResult.getResult();
 
@@ -315,7 +342,7 @@ public class UserRepositoryTest {
         assertEquals(Status.OKAY, userResult.getStatus());
         assertTrue(userResult.getResult().getIsActivated());
 
-        // 4th user never existed in the systemd
+        // 4th user never existed in the system
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email4);
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -334,10 +361,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email1);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email1);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user1 = userResult.getResult();
 
@@ -347,9 +378,12 @@ public class UserRepositoryTest {
         user1.setActivationCode(activationCode1);
 
         // Second email registration
+        requestHash.clear();
+        requestHash.put("email", email2);
+
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email2);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user2 = userResult.getResult();
 
@@ -359,9 +393,12 @@ public class UserRepositoryTest {
         user2.setActivationCode(activationCode2);
 
         // Third email registration
+        requestHash.clear();
+        requestHash.put("email", email3);
+
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email3);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         User user3 = userResult.getResult();
 
@@ -384,15 +421,19 @@ public class UserRepositoryTest {
         assertEquals(Status.OKAY, status);
 
         // Get the user list
+        // Create request hash with email address
+        HashMap<String, List<String>> emailsRequestHash = new HashMap<String, List<String>>();
+
         List<String> userEmails = Arrays.asList("test.user.1@test.com",
             "test.user.2@test.com",
             "test.user.3@test.com",
             "test.user.4@test.com");
+        emailsRequestHash.put("emails", userEmails);
 
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/list");
         UserListResult userListResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserListResult.class, userEmails);
+                .post(UserListResult.class, emailsRequestHash);
         assertEquals(Status.OKAY, status);
 
         // Should be only two activated users from all of them
@@ -407,10 +448,14 @@ public class UserRepositoryTest {
         Client client = createClient();
         WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
 
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", email);
+
         // First email registration
         userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(UserResult.class, email);
+                .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
         assertNotNull(userResult.getResult());
 
@@ -431,6 +476,43 @@ public class UserRepositoryTest {
 
         // The new activation code should not be the same as the previous one
         assertFalse(firstActivationCode.equals(secondActivationCode));
+    }
+
+    @Test
+    public void shouldBadRequest() throws Exception {
+        String email = "test.user.1@test.com";
+
+        UserResult userResult;
+        Client client = createClient();
+        WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
+
+        // Create request hash with email address using wrong key
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email_wrong_key", email);
+
+        // First email registration
+        userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(UserResult.class, requestHash);
+        assertEquals(Status.BAD_REQUEST, userResult.getStatus());
+        assertNull(userResult.getResult());
+
+        // Create request hash with email address
+        HashMap<String, List<String>> emailsRequestHash = new HashMap<String, List<String>>();
+        List<String> userEmails = Arrays.asList("test.user.1@test.com",
+                "test.user.2@test.com",
+                "test.user.3@test.com",
+                "test.user.4@test.com");
+
+        // Put emails list into requestHash with wrong hash key
+        emailsRequestHash.put("emails_wrong_key", userEmails);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/list");
+        UserListResult userListResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(UserListResult.class, emailsRequestHash);
+        assertEquals(Status.BAD_REQUEST, userListResult.getStatus());
+        assertNull(userListResult.getResult());
     }
 
     private Client createClient() {

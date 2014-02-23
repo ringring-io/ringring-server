@@ -6,6 +6,7 @@ import javax.ws.rs.core.MediaType;
 
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.HashMap;
 import java.util.List;
 import com.google.inject.Inject;
 
@@ -14,6 +15,7 @@ import com.zirgoo.core.User;
 import com.zirgoo.core.UserResult;
 import com.zirgoo.core.UserList;
 import com.zirgoo.core.UserListResult;
+import com.zirgoo.core.exceptions.BadRequestException;
 import com.zirgoo.core.exceptions.InvalidActivationCodeException;
 import com.zirgoo.core.exceptions.MailException;
 import com.zirgoo.core.exceptions.UserAlreadyActivatedException;
@@ -56,16 +58,24 @@ public class UserResource {
     @Path("/list/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public UserListResult getUsers(List<String> emails) {
+    public UserListResult getUsers(HashMap<String, List<String>> requestHash) {
         UserList userList = null;
         Status status = Status.OKAY;
 
         try {
+            List<String> emails = requestHash.get("emails");
+            if (emails == null) {
+                throw new BadRequestException();
+            }
+
             userList = new UserList(userRepository.getUsers(emails, true));
+            if (userList == null || userList.getUserList().size() == 0) {
+                status = Status.USER_NOT_FOUND;
+            }
         }
+        catch (BadRequestException e) { status = Status.BAD_REQUEST; }
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
-        if (userList.getUserList().size() == 0) { status = Status.USER_NOT_FOUND; }
 
         return new UserListResult(userList, status);
     }
@@ -73,13 +83,19 @@ public class UserResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public UserResult register(String email) {
+    public UserResult register(HashMap<String, String> requestHash) {
         User user = null;
         Status status = Status.OKAY;
 
         try {
+            String email = requestHash.get("email");
+            if (email == null) {
+                throw new BadRequestException();
+            }
+
             user = userRepository.register(email);
         }
+        catch (BadRequestException e) { status = Status.BAD_REQUEST; }
         catch (AddressException e) { status = Status.INVALID_EMAIL; }
         catch (SQLIntegrityConstraintViolationException e) { status = Status.EMAIL_ALREADY_REGISTERED; }
         catch (MailException e) { status = Status.INTERNAL_SMTP_ERROR; }
