@@ -22,6 +22,8 @@ import com.zirgoo.server.config.setup.PropertiesConfigManagerImpl;
 import com.zirgoo.server.persistence.ConnectionManager;
 import com.zirgoo.server.persistence.repositories.UserRepository;
 
+import org.postgresql.util.PSQLException;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -139,8 +141,8 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
         Connection connection = connectionManager.getConnection();
 
         try {
-            String sql = "SELECT email, activation_code, is_activated, FALSE FROM zirgoo_users WHERE email = LOWER(?)";
-            if(onlyActivatedUsers) sql = sql + " AND is_activated = TRUE";
+            String sql = "SELECT zu.email, zu.activation_code, zu.is_activated, CASE WHEN r.reg_user IS NULL THEN false ELSE true END FROM zirgoo_users zu LEFT JOIN directory d ON d.zirgoo_user_id = zu.id LEFT JOIN registrations r ON r.reg_user = d.username WHERE zu.email = LOWER(?)";
+            if(onlyActivatedUsers) sql = sql + " AND zu.is_activated = TRUE";
 
             PreparedStatement query = connection.prepareStatement(sql);
             query.clearParameters();
@@ -188,7 +190,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
         sqlInEmails = sqlInEmails + "null)";
 
         try {
-            String sql = "SELECT email, activation_code, is_activated, FALSE FROM zirgoo_users WHERE email IN " + sqlInEmails;
+            String sql = "SELECT zu.email, zu.activation_code, zu.is_activated, CASE WHEN r.reg_user IS NULL THEN false ELSE true END FROM zirgoo_users zu LEFT JOIN directory d ON d.zirgoo_user_id = zu.id LEFT JOIN registrations r ON r.reg_user = d.username WHERE zu.email IN " + sqlInEmails;
             if(onlyActivatedUsers) sql = sql + " AND is_activated = TRUE";
 
             PreparedStatement query = connection.prepareStatement(sql);
@@ -227,7 +229,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             if(!isValidEmailAddress(email))
                 throw new AddressException();
 
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO zirgoo_users (email, activation_code, is_activated) VALUES(LOWER(?), SUBSTRING(MD5(RAND()) FROM 1 FOR ?), FALSE)");
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO zirgoo_users (email, activation_code, is_activated) VALUES(LOWER(?), SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR ?), FALSE)");
             stmt.clearParameters();
             stmt.setString(1, email.toLowerCase());
             stmt.setInt(2, configManager.getActivationCodeLength());
@@ -241,15 +243,17 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
 
         } catch (AddressException e) {
             throw new AddressException();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new SQLIntegrityConstraintViolationException(e);
         } catch (MessagingException e) {
             e.printStackTrace();
 
             throw new MailException(e);
-        } catch (SQLException e) {
-            e.printStackTrace();
 
+        } catch (SQLException e) {
+            // Catch Unique constratin violation
+            if (e.getSQLState().equals("23505"))
+                throw new SQLIntegrityConstraintViolationException();
+
+            e.printStackTrace();
             throw new SQLException(e);
         } finally {
             try {
@@ -344,7 +348,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt.executeUpdate();
 
             /* INSERT INTO dialplan_extension (Email based unique extension) */
-            stmt = connection.prepareStatement("INSERT INTO dialplan_extension (context_id, name, `continue`, weight) VALUES ((SELECT context_id FROM dialplan_context WHERE context = ?), LOWER(?), '', 0)");
+            stmt = connection.prepareStatement("INSERT INTO dialplan_extension (context_id, name, continue, weight) VALUES ((SELECT context_id FROM dialplan_context WHERE context = ?), LOWER(?), '', 0)");
             stmt.clearParameters();
             stmt.setString(1, configManager.getSipContext());
             stmt.setString(2, user.getEmail().toLowerCase());
@@ -410,7 +414,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             if(!isValidEmailAddress(email))
                 throw new AddressException();
 
-            PreparedStatement stmt = connection.prepareStatement("UPDATE zirgoo_users SET activation_code = SUBSTRING(MD5(RAND()) FROM 1 FOR ?) WHERE email = LOWER(?)");
+            PreparedStatement stmt = connection.prepareStatement("UPDATE zirgoo_users SET activation_code = SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR ?) WHERE email = LOWER(?)");
             stmt.clearParameters();
             stmt.setInt(1, configManager.getActivationCodeLength());
             stmt.setString(2, email.toLowerCase());

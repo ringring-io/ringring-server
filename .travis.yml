@@ -1,5 +1,5 @@
 before_script:
-  - mysql -e 'create database zirgoo_test;'
+  - psql -c 'create database zirgoo_test;' -U postgres
 
 language: java
 install: mvn install -DskipTests=true
