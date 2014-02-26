@@ -6,6 +6,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 import com.zirgoo.core.Status;
+import com.zirgoo.core.StatusResult;
 import com.zirgoo.core.User;
 
 import com.zirgoo.core.UserListResult;
@@ -189,11 +190,11 @@ public class UserRepositoryTest {
 
         // Activate the user
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + registeredUser.getEmail());
-        Status status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        StatusResult statusresult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, registeredUser);
+                .put(StatusResult.class, registeredUser);
 
-        assertEquals(Status.OKAY, status);
+        assertEquals(Status.OKAY, statusresult.getStatus());
     }
 
     @Test
@@ -229,21 +230,21 @@ public class UserRepositoryTest {
 
         // 1st try: email in the path is not matching to the user's email
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/test.user.other@test.com");
-        Status status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, registeredUser);
+                .put(StatusResult.class, registeredUser);
 
-        assertEquals(Status.INVALID_EMAIL, status);
+        assertEquals(Status.INVALID_EMAIL, statusResult.getStatus());
 
         // 2nd try: Incorrect activation code
         registeredUser.setActivationCode("SOME_FALSE_ACTIVATION_CODE");
 
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + registeredUser.getEmail());
-        status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, registeredUser);
+                .put(StatusResult.class, registeredUser);
 
-        assertEquals(Status.INVALID_ACTIVATION_CODE, status);
+        assertEquals(Status.INVALID_ACTIVATION_CODE, statusResult.getStatus());
     }
 
     @Test
@@ -305,16 +306,16 @@ public class UserRepositoryTest {
 
         // Activate two users from the three (1st and 3rd)
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + user1.getEmail());
-        Status status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, user1);
-        assertEquals(Status.OKAY, status);
+                .put(StatusResult.class, user1);
+        assertEquals(Status.OKAY, statusResult.getStatus());
 
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + user3.getEmail());
-        status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, user3);
-        assertEquals(Status.OKAY, status);
+                .put(StatusResult.class, user3);
+        assertEquals(Status.OKAY, statusResult.getStatus());
 
         // Tyring to get all users one by one
         // 1st user should registered and activated
@@ -409,16 +410,16 @@ public class UserRepositoryTest {
 
         // Activate two users from the three (1st and 3rd)
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + user1.getEmail());
-        Status status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, user1);
-        assertEquals(Status.OKAY, status);
+                .put(StatusResult.class, user1);
+        assertEquals(Status.OKAY, statusResult.getStatus());
 
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + user3.getEmail());
-        status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .put(Status.class, user3);
-        assertEquals(Status.OKAY, status);
+                .put(StatusResult.class, user3);
+        assertEquals(Status.OKAY, statusResult.getStatus());
 
         // Get the user list
         // Create request hash with email address
@@ -434,7 +435,6 @@ public class UserRepositoryTest {
         UserListResult userListResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserListResult.class, emailsRequestHash);
-        assertEquals(Status.OKAY, status);
 
         // Should be only two activated users from all of them
         assertEquals(2, userListResult.getResult().getUserList().size());
@@ -465,10 +465,10 @@ public class UserRepositoryTest {
 
         // Request to change the activation code
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/renewactivationcode/" + email);
-        Status status = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(Status.class);
-        assertEquals(Status.OKAY, status);
+                .get(StatusResult.class);
+        assertEquals(Status.OKAY, statusResult.getStatus());
 
         // Get first activation code from email
         MimeMessage message2 = getLastMail().getMimeMessage();

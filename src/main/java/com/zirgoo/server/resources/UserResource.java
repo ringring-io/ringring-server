@@ -11,6 +11,7 @@ import java.util.List;
 import com.google.inject.Inject;
 
 import com.zirgoo.core.Status;
+import com.zirgoo.core.StatusResult;
 import com.zirgoo.core.User;
 import com.zirgoo.core.UserResult;
 import com.zirgoo.core.UserList;
@@ -109,11 +110,11 @@ public class UserResource {
     @Path("{email}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Status activate(User user, @PathParam("email") String email) {
+    public StatusResult activate(User user, @PathParam("email") String email) {
         Status status = Status.OKAY;
 
         if (!email.equals(user.getEmail())) {
-            return Status.INVALID_EMAIL;
+            return new StatusResult(Status.INVALID_EMAIL);
         }
 
         try {
@@ -126,13 +127,13 @@ public class UserResource {
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
 
-        return status;
+        return new StatusResult(status);
     }
 
     @GET
     @Path("/renewactivationcode/{email}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Status renewActivationCode(@PathParam("email") String email) {
+    public StatusResult renewActivationCode(@PathParam("email") String email) {
         Status status = Status.OKAY;
 
         try {
@@ -143,6 +144,6 @@ public class UserResource {
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
 
-        return status;
+        return new StatusResult(status);
     }
 }
