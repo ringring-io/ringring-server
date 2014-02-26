@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/zirgoo/zirgoo-server.png?label=ready&title=Ready)](https://waffle.io/zirgoo/zirgoo-server)
 [![Build Status](https://travis-ci.org/zirgoo/zirgoo-server.png)](https://travis-ci.org/zirgoo/zirgoo-server)
 zirgoo-server
 =============
