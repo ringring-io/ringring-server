@@ -356,10 +356,10 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt.executeUpdate();
 
             /* INSERT INTO dialplan_condition (Regexp match to bridge extensions) */
-            stmt = connection.prepareStatement("INSERT INTO dialplan_condition (extension_id, field, expression, weight) VALUES ((SELECT extension_id FROM dialplan_extension WHERE name = LOWER(?)), 'destination_number', CONCAT(CONCAT('^', ?), '$'), 10)");
+            stmt = connection.prepareStatement("INSERT INTO dialplan_condition (extension_id, field, expression, weight) VALUES ((SELECT extension_id FROM dialplan_extension WHERE name = LOWER(?)), 'destination_number', CONCAT(CONCAT('^', REPLACE(LOWER(?), '@', '%40')), '$'), 10)");
             stmt.clearParameters();
             stmt.setString(1, user.getEmail().toLowerCase());
-            stmt.setString(2, sipEncode(user.getEmail().toLowerCase()));
+            stmt.setString(2, user.getEmail().toLowerCase());
 
             stmt.executeUpdate();
 
