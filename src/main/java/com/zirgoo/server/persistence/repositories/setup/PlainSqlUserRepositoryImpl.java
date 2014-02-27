@@ -311,7 +311,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt = connection.prepareStatement("INSERT INTO directory (zirgoo_user_id, username, domain, domain_id) VALUES ((SELECT id FROM zirgoo_users WHERE email = LOWER(?)), ?, '', (SELECT id FROM directory_domains WHERE domain_name = ?))");
             stmt.clearParameters();
             stmt.setString(1, user.getEmail().toLowerCase());
-            stmt.setString(2, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(2, sipEncode(user.getEmail().toLowerCase()));
             stmt.setString(3, configManager.getSipDomain());
 
             stmt.executeUpdate();
@@ -319,7 +319,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             // Insert into directory_vars table (context)
             stmt = connection.prepareStatement("INSERT INTO directory_vars (directory_id, var_name, var_value) VALUES ((SELECT id FROM directory WHERE username = ?), 'user_context', LOWER(?))");
             stmt.clearParameters();
-            stmt.setString(1, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(1, sipEncode(user.getEmail().toLowerCase()));
             stmt.setString(2, configManager.getSipContext());
 
             stmt.executeUpdate();
@@ -327,7 +327,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             // Insert into directory_vars table (internal_caller_id_name)
             stmt = connection.prepareStatement("INSERT INTO directory_vars (directory_id, var_name, var_value) VALUES ((SELECT id FROM directory WHERE username = ?), 'internal_caller_id_name', LOWER(?))");
             stmt.clearParameters();
-            stmt.setString(1, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(1, sipEncode(user.getEmail().toLowerCase()));
             stmt.setString(2, user.getEmail().toLowerCase());
 
             stmt.executeUpdate();
@@ -335,7 +335,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             // Insert into directory_params table (password) */
             stmt = connection.prepareStatement("INSERT INTO directory_params (directory_id, param_name, param_value) VALUES ((SELECT id FROM directory WHERE username = ?), 'password', ?)");
             stmt.clearParameters();
-            stmt.setString(1, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(1, sipEncode(user.getEmail().toLowerCase()));
             stmt.setString(2, user.getActivationCode());
 
             stmt.executeUpdate();
@@ -343,7 +343,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             // Insert into directory_params table (password) */
             stmt = connection.prepareStatement("INSERT INTO directory_params (directory_id, param_name, param_value) VALUES ((SELECT id FROM directory WHERE username = ?), 'dial-string', '{presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')");
             stmt.clearParameters();
-            stmt.setString(1, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(1, sipEncode(user.getEmail().toLowerCase()));
 
             stmt.executeUpdate();
 
@@ -359,7 +359,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt = connection.prepareStatement("INSERT INTO dialplan_condition (extension_id, field, expression, weight) VALUES ((SELECT extension_id FROM dialplan_extension WHERE name = LOWER(?)), 'destination_number', CONCAT(CONCAT('^', ?), '$'), 10)");
             stmt.clearParameters();
             stmt.setString(1, user.getEmail().toLowerCase());
-            stmt.setString(2, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(2, sipEncode(user.getEmail().toLowerCase()));
 
             stmt.executeUpdate();
 
@@ -374,7 +374,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt = connection.prepareStatement("INSERT INTO dialplan_actions (condition_id, application, data, type, weight) VALUES ((SELECT condition_id FROM dialplan_condition WHERE extension_id = (SELECT extension_id FROM dialplan_extension WHERE name = LOWER(?))), 'bridge', CONCAT(CONCAT(CONCAT('user/', ?),'@'), ?), 'action', 20)");
             stmt.clearParameters();
             stmt.setString(1, user.getEmail().toLowerCase());
-            stmt.setString(2, URLEncoder.encode(user.getEmail().toLowerCase(), "UTF-8"));
+            stmt.setString(2, sipEncode(user.getEmail().toLowerCase()));
             stmt.setString(3, configManager.getSipDomain());
 
             stmt.executeUpdate();
@@ -467,6 +467,10 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
                 tokens.length == 2 &&
                 tokens[0].length() > 0 &&
                 tokens[1].length() > 0);
+    }
+
+    private String sipEncode(String email) {
+        return email.replaceAll("@", "_AT_");
     }
 
     private void sendMail(String to, String subject, String body) throws Exception {
