@@ -1,7 +1,5 @@
 package com.zirgoo.server;
 
-import com.google.inject.AbstractModule;
-
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.json.JSONConfiguration;
 
@@ -17,7 +15,7 @@ import com.zirgoo.server.config.setup.guice.ConfigManagerModule;
 import com.zirgoo.server.db.baseline.CreateBaseline;
 import com.zirgoo.server.persistence.repositories.UserRepository;
 import com.zirgoo.server.persistence.repositories.setup.guice.UserRepositoryModule;
-import com.zirgoo.server.persistence.setup.guice.PersistenceModule;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,14 +25,11 @@ import com.google.inject.Injector;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +107,7 @@ public class UserRepositoryTest {
         assertEquals(Status.OKAY, userResult.getStatus());
         assertTrue(userResult.isSuccess());
 
-        User registeredUser = userResult.getResult();
+        User registeredUser = userResult.getUser();
         assertEquals(email, registeredUser.getEmail());
         assertFalse(registeredUser.getIsActivated());
         assertFalse(registeredUser.getIsLoggedIn());
@@ -126,7 +121,7 @@ public class UserRepositoryTest {
         assertEquals(Status.EMAIL_ALREADY_REGISTERED, userResult.getStatus());
         assertFalse(userResult.isSuccess());
 
-        assertNull(userResult.getResult());
+        assertNull(userResult.getUser());
     }
 
     @Test
@@ -150,7 +145,7 @@ public class UserRepositoryTest {
         assertEquals(Status.INVALID_EMAIL, userResult.getStatus());
         assertFalse(userResult.isSuccess());
 
-        assertNull(userResult.getResult());
+        assertNull(userResult.getUser());
     }
 
     @Test
@@ -179,7 +174,7 @@ public class UserRepositoryTest {
         assertEquals(Status.OKAY, userResult.getStatus());
         assertTrue(userResult.isSuccess());
 
-        User registeredUser = userResult.getResult();
+        User registeredUser = userResult.getUser();
         assertEquals(email, registeredUser.getEmail());
         assertFalse(registeredUser.getIsActivated());
         assertFalse(registeredUser.getIsLoggedIn());
@@ -223,7 +218,7 @@ public class UserRepositoryTest {
         assertEquals(configManager.getSmtpFrom(), message.getFrom()[0].toString());
         assertEquals(email, message.getRecipients(Message.RecipientType.TO)[0].toString());
 
-        User registeredUser = userResult.getResult();
+        User registeredUser = userResult.getUser();
         assertEquals(email, registeredUser.getEmail());
         assertFalse(registeredUser.getIsActivated());
         assertFalse(registeredUser.getIsLoggedIn());
@@ -267,7 +262,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user1 = userResult.getResult();
+        User user1 = userResult.getUser();
 
         // Get first activation code from email
         MimeMessage message1 = getLastMail().getMimeMessage();
@@ -282,7 +277,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user2 = userResult.getResult();
+        User user2 = userResult.getUser();
 
         // Get second activation code from email
         MimeMessage message2 = getLastMail().getMimeMessage();
@@ -297,7 +292,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user3 = userResult.getResult();
+        User user3 = userResult.getUser();
 
         // Get third activation code from email
         MimeMessage message3 = getLastMail().getMimeMessage();
@@ -324,7 +319,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(UserResult.class);
         assertEquals(Status.OKAY, userResult.getStatus());
-        assertTrue(userResult.getResult().getIsActivated());
+        assertTrue(userResult.getUser().getIsActivated());
 
         // 2nd user should not be registered
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email2);
@@ -333,7 +328,7 @@ public class UserRepositoryTest {
                 .get(UserResult.class);
 
         assertEquals(Status.USER_NOT_FOUND, userResult.getStatus());
-        assertNull(userResult.getResult());
+        assertNull(userResult.getUser());
 
         // 3rd user should registered and activated
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email3);
@@ -341,7 +336,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(UserResult.class);
         assertEquals(Status.OKAY, userResult.getStatus());
-        assertTrue(userResult.getResult().getIsActivated());
+        assertTrue(userResult.getUser().getIsActivated());
 
         // 4th user never existed in the system
         webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email4);
@@ -349,7 +344,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(UserResult.class);
         assertEquals(Status.USER_NOT_FOUND, userResult.getStatus());
-        assertNull(userResult.getResult());
+        assertNull(userResult.getUser());
     }
 
     @Test
@@ -371,7 +366,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user1 = userResult.getResult();
+        User user1 = userResult.getUser();
 
         // Get first activation code from email
         MimeMessage message1 = getLastMail().getMimeMessage();
@@ -386,7 +381,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user2 = userResult.getResult();
+        User user2 = userResult.getUser();
 
         // Get second activation code from email
         MimeMessage message2 = getLastMail().getMimeMessage();
@@ -401,7 +396,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        User user3 = userResult.getResult();
+        User user3 = userResult.getUser();
 
         // Get first activation code from email
         MimeMessage message3 = getLastMail().getMimeMessage();
@@ -437,7 +432,7 @@ public class UserRepositoryTest {
                 .post(UserListResult.class, emailsRequestHash);
 
         // Should be only two activated users from all of them
-        assertEquals(2, userListResult.getResult().getUserList().size());
+        assertEquals(2, userListResult.getUserList().getUserList().size());
     }
 
     @Test
@@ -457,7 +452,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.OKAY, userResult.getStatus());
-        assertNotNull(userResult.getResult());
+        assertNotNull(userResult.getUser());
 
         // Get first activation code from email
         MimeMessage message1 = getLastMail().getMimeMessage();
@@ -495,7 +490,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserResult.class, requestHash);
         assertEquals(Status.BAD_REQUEST, userResult.getStatus());
-        assertNull(userResult.getResult());
+        assertNull(userResult.getUser());
 
         // Create request hash with email address
         HashMap<String, List<String>> emailsRequestHash = new HashMap<String, List<String>>();
@@ -512,7 +507,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserListResult.class, emailsRequestHash);
         assertEquals(Status.BAD_REQUEST, userListResult.getStatus());
-        assertNull(userListResult.getResult());
+        assertNull(userListResult.getUserList());
     }
 
     private Client createClient() {

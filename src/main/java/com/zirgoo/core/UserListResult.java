@@ -7,22 +7,22 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class UserListResult {
-    private UserList result;
+    private UserList userList;
     private Status status;
 
     public UserListResult() {
     }
 
-    public UserListResult(UserList result, Status status) {
-        this.result = result;
+    public UserListResult(UserList userList, Status status) {
+        this.userList = userList;
         this.status = status;
     }
 
-    public UserList getResult() {
-        return this.result;
+    public UserList getUserList() {
+        return this.userList;
     }
-    public void setResult(UserList result) {
-        this.result = result;
+    public void setUserList(UserList userList) {
+        this.userList = userList;
     }
 
     public Status getStatus() {
@@ -44,19 +44,19 @@ public class UserListResult {
                 + ",isSuccess=" + this.isSuccess() + '\n'
                 + "}";
 
-        String resultString = null;
-        for (User user : getResult().getUserList()) {
-            if (resultString == null) {
-                resultString = user.toString();
+        String userListString = null;
+        for (User user : getUserList().getUserList()) {
+            if (userListString == null) {
+                userListString = user.toString();
             }
             else {
-                resultString = resultString + user.toString();
+                userListString = userListString + user.toString();
             }
         }
 
         return statusString + '\n'
                 + "Result {" + '\n'
-                + resultString + '\n'
+                + userListString + '\n'
                 + "}";
     }
 

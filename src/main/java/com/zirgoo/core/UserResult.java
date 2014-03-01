@@ -7,19 +7,19 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class UserResult {
-    private User result;
+    private User user;
     private Status status;
 
     public UserResult() {
     }
 
-    public UserResult(User result, Status status) {
-        this.result = result;
+    public UserResult(User user, Status status) {
+        this.user = user;
         this.status = status;
     }
 
-    public User getResult() {
-        return this.result;
+    public User getUser() {
+        return this.user;
     }
 
     public Status getStatus() {
@@ -37,14 +37,14 @@ public class UserResult {
                 + ",isSuccess=" + this.isSuccess() + '\n'
                 + "}";
 
-        String resultString = null;
-        if(getResult() != null) {
-            resultString = getResult().toString();
+        String userString = null;
+        if(getUser() != null) {
+            userString = getUser().toString();
         }
 
         return statusString + '\n'
-                + "Result {" + '\n'
-                + resultString + '\n'
+                + "User {" + '\n'
+                + userString + '\n'
                 + "}";
     }
 }
