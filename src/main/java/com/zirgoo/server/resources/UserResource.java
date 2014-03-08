@@ -14,14 +14,12 @@ import com.zirgoo.core.Status;
 import com.zirgoo.core.StatusResult;
 import com.zirgoo.core.User;
 import com.zirgoo.core.UserResult;
-import com.zirgoo.core.UserList;
 import com.zirgoo.core.UserListResult;
 import com.zirgoo.core.exceptions.BadRequestException;
 import com.zirgoo.core.exceptions.InvalidActivationCodeException;
 import com.zirgoo.core.exceptions.MailException;
 import com.zirgoo.core.exceptions.UserAlreadyActivatedException;
 import com.zirgoo.core.exceptions.UserNotFoundException;
-import com.zirgoo.server.config.ConfigManager;
 import com.zirgoo.server.persistence.repositories.UserRepository;
 
 /**
@@ -60,7 +58,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public UserListResult getUsers(HashMap<String, List<String>> requestHash) {
-        UserList userList = null;
+        List<User> users = null;
         Status status = Status.OKAY;
 
         try {
@@ -69,8 +67,8 @@ public class UserResource {
                 throw new BadRequestException();
             }
 
-            userList = new UserList(userRepository.getUsers(emails, true));
-            if (userList == null || userList.getUserList().size() == 0) {
+            users = userRepository.getUsers(emails, true);
+            if (users == null || users.size() == 0) {
                 status = Status.USER_NOT_FOUND;
             }
         }
@@ -78,7 +76,7 @@ public class UserResource {
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
 
-        return new UserListResult(userList, status);
+        return new UserListResult(users, status);
     }
 
     @POST

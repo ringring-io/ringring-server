@@ -2,27 +2,29 @@ package com.zirgoo.core;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.util.List;
+
 /**
  * Created by kosztope on 11/02/14.
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class UserListResult {
-    private UserList userList;
+    private List<User> users;
     private Status status;
 
     public UserListResult() {
     }
 
-    public UserListResult(UserList userList, Status status) {
-        this.userList = userList;
+    public UserListResult(List<User> users, Status status) {
+        this.users = users;
         this.status = status;
     }
 
-    public UserList getUserList() {
-        return this.userList;
+    public List<User> getUsers() {
+        return this.users;
     }
-    public void setUserList(UserList userList) {
-        this.userList = userList;
+    public void setUserList(List<User> users) {
+        this.users = users;
     }
 
     public Status getStatus() {
@@ -45,7 +47,7 @@ public class UserListResult {
                 + "}";
 
         String userListString = null;
-        for (User user : getUserList().getUserList()) {
+        for (User user : getUsers()) {
             if (userListString == null) {
                 userListString = user.toString();
             }

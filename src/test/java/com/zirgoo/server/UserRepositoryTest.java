@@ -432,7 +432,7 @@ public class UserRepositoryTest {
                 .post(UserListResult.class, emailsRequestHash);
 
         // Should be only two activated users from all of them
-        assertEquals(2, userListResult.getUserList().getUserList().size());
+        assertEquals(2, userListResult.getUsers().size());
     }
 
     @Test
@@ -507,7 +507,7 @@ public class UserRepositoryTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(UserListResult.class, emailsRequestHash);
         assertEquals(Status.BAD_REQUEST, userListResult.getStatus());
-        assertNull(userListResult.getUserList());
+        assertNull(userListResult.getUsers());
     }
 
     private Client createClient() {
