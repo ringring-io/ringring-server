@@ -459,7 +459,7 @@ public class UserRepositoryTest {
         String firstActivationCode = getActivationCodeFromEmailContent(message1.getContent().toString());
 
         // Request to change the activation code
-        webResource = client.resource(zirgooServerApi.getUrl() + "/user/renewactivationcode/" + email);
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email + "/renewactivationcode");
         StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(StatusResult.class);

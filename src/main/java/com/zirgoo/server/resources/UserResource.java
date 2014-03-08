@@ -129,7 +129,7 @@ public class UserResource {
     }
 
     @GET
-    @Path("/renewactivationcode/{email}")
+    @Path("/{email}/renewactivationcode")
     @Produces(MediaType.APPLICATION_JSON)
     public StatusResult renewActivationCode(@PathParam("email") String email) {
         Status status = Status.OKAY;
