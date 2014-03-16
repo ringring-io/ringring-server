@@ -2,13 +2,20 @@ package com.zirgoo.server;
 
 import com.google.inject.Inject;
 import com.zirgoo.server.config.ConfigManager;
+
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.zirgoo.server.servlet.GuiceConfig;
+
+import sun.org.mozilla.javascript.internal.ContextFactory;
 
 /**
  * Created by kosztope on 23/01/14.
@@ -24,7 +31,29 @@ public class ZirgooServerApi {
 
     public Server run() {
         // Create the server
-        server = new Server(configManager.getServerPort());
+        server = new Server();
+
+        // Create non-ssl connector
+        SocketConnector connector = new SocketConnector();
+        connector.setHost(configManager.getServerHost());
+        connector.setPort(configManager.getServerPort());
+        Connector[] connectors = new Connector[] {connector};
+
+        // Create ssl connector
+        if (configManager.getSslEnabled()) {
+            SslContextFactory sslContextFactory = new SslContextFactory(configManager.getSslKeystorePath());
+            sslContextFactory.setKeyStorePassword(configManager.getSslKeystorePassword());
+            sslContextFactory.setKeyManagerPassword(configManager.getSslKeymanagerPassword());
+
+            SslSocketConnector sslConnector = new SslSocketConnector(sslContextFactory);
+            sslConnector.setHost(configManager.getServerHost());
+            sslConnector.setPort(configManager.getSslPort());
+
+            connectors = new Connector[] {connector, sslConnector};
+        }
+
+        // Add connectors to server instance
+        server.setConnectors(connectors);
 
         // Create a servlet context and add the jersey servlet
         ServletContextHandler sch = new ServletContextHandler(server, "/");

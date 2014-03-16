@@ -18,6 +18,12 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     private String serverHost;
     private int serverPort;
 
+    private boolean sslEnabled;
+    private int sslPort;
+    private String sslKeystorePath;
+    private String sslKeystorePassword;
+    private String sslKeymanagerPassword;
+
     private String databaseDriver;
     private String databaseUrl;
     private String databaseUser;
@@ -55,6 +61,12 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
         try {
             serverHost = properties.getProperty("server.host");
             serverPort = Integer.parseInt(properties.getProperty("server.port"));
+
+            sslEnabled = "true".equals(properties.getProperty("ssl.enabled"));
+            sslPort = Integer.parseInt(properties.getProperty("ssl.port"));
+            sslKeystorePath = properties.getProperty("ssl.keystore.path");
+            sslKeystorePassword = properties.getProperty("ssl.keystore.password");
+            sslKeymanagerPassword = properties.getProperty("ssl.keymanager.password");
 
             databaseDriver = properties.getProperty("db.driver");
             databaseUrl = properties.getProperty("db.url");
@@ -96,6 +108,21 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     public int getServerPort() {
         return serverPort;
     }
+
+    @Override
+    public boolean getSslEnabled() { return sslEnabled; }
+
+    @Override
+    public int getSslPort() { return sslPort; }
+
+    @Override
+    public String getSslKeystorePath() { return sslKeystorePath; }
+
+    @Override
+    public String getSslKeystorePassword() { return sslKeystorePassword; }
+
+    @Override
+    public String getSslKeymanagerPassword() { return sslKeymanagerPassword; }
 
     @Override
     public String getDatabaseDriver() {
@@ -164,6 +191,11 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
         return "ConfigManager{" + '\n'
                 + " server.host=" + serverHost + '\n'
                 + ",server.port=" + serverPort + '\n'
+                + ",ssl.enabled=" + sslEnabled + '\n'
+                + ",ssl.port=" + sslPort + '\n'
+                + ",ssl.keystore.path" + sslKeystorePath + '\n'
+                + ",ssl.keystore.password" + sslKeystorePassword + '\n'
+                + ",ssl.keymanager.password" + sslKeymanagerPassword + '\n'
                 + ",db.driver=" + databaseDriver + '\n'
                 + ",db.url=" + databaseUrl + '\n'
                 + ",db.user=" + databaseUser + '\n'

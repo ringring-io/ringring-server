@@ -12,6 +12,12 @@ public interface ConfigManager {
     String getServerHost();
     int getServerPort();
 
+    int getSslPort();
+    boolean getSslEnabled();
+    String getSslKeystorePath();
+    String getSslKeystorePassword();
+    String getSslKeymanagerPassword();
+
     String getDatabaseDriver();
     String getDatabaseUrl();
     String getDatabaseUser();
