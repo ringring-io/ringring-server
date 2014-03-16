@@ -15,8 +15,6 @@ import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.zirgoo.server.servlet.GuiceConfig;
 
-import sun.org.mozilla.javascript.internal.ContextFactory;
-
 /**
  * Created by kosztope on 23/01/14.
  */
