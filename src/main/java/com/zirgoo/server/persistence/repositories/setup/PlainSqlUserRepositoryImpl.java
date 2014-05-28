@@ -462,6 +462,8 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
 
     @Override
     public void invite(String fromEmail, String toEmail) throws Exception {
+        int minutesSinceLastInviteSent = 0;
+
         Connection connection = connectionManager.getConnection();
         try {
             if(!isValidEmailAddress(fromEmail) || !isValidEmailAddress(toEmail))
@@ -472,6 +474,19 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
 
             if(getUser(toEmail, false) != null)
                 throw new EmailAlreadyRegisteredException();
+
+            // Select when the last invite sent to this email
+            PreparedStatement query = connection.prepareStatement("SELECT COALESCE(EXTRACT(MINUTE FROM (CURRENT_TIMESTAMP - MAX(created_at))),0) FROM zirgoo_invites WHERE invite_to = LOWER(?)");
+            query.clearParameters();
+            query.setString(1, toEmail);
+
+            ResultSet rs = query.executeQuery();
+            while(rs.next()) {
+                minutesSinceLastInviteSent = rs.getInt(1);
+            }
+
+            if(minutesSinceLastInviteSent > configManager.getInvitationLimit())
+                throw new InvitationLimitExceededException();
 
             // Insert into directory table
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO zirgoo_invites (invite_from, invite_to) VALUES (LOWER(?), LOWER(?))");

@@ -43,6 +43,7 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     private String activationCodeSubject;
     private String activationCodeBody;
 
+    private int invitationLimit;
     private String invitationSubject;
     private String invitationBody;
 
@@ -90,6 +91,7 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
             activationCodeSubject = properties.getProperty("mail.activationcode.subject");
             activationCodeBody = properties.getProperty("mail.activationcode.body");
 
+            invitationLimit = Integer.parseInt(properties.getProperty("mail.invitation.limit"));
             invitationSubject = properties.getProperty("mail.invitation.subject");
             invitationBody = properties.getProperty("mail.invitation.body");
 
@@ -185,6 +187,9 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     public String getActivationCodeBody() { return activationCodeBody; }
 
     @Override
+    public int getInvitationLimit() { return invitationLimit; }
+
+    @Override
     public String getInvitationSubject() { return invitationSubject; }
 
     @Override
@@ -224,6 +229,7 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
                 + ",smtp.realname=" + smtpRealname + '\n'
                 + ",mail.activationcode.subject=" + activationCodeSubject + '\n'
                 + ",mail.activationcode.body=" + activationCodeBody + '\n'
+                + ",mail.invitation.limit=" + invitationLimit + '\n'
                 + ",mail.invitation.subject=" + invitationSubject + '\n'
                 + ",mail.invitation.body=" + invitationBody + '\n'
                 + ",mail.renewactivationcode.subject=" + renewActivationCodeSubject + '\n'
