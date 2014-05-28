@@ -252,7 +252,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
 
             // Email activation code
             String activationCode = getActivationCode(email.toLowerCase());
-            String body = configManager.getActivationCodeBody() + activationCode;
+            String body = configManager.getRenewActivationCodeBody().replace("_ACTIVATION_CODE_", activationCode);
             sendMail(email.toLowerCase(), configManager.getActivationCodeSubject(), body);
 
         } catch (AddressException e) {
@@ -438,7 +438,8 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             // Email the new activation code
             String activationCode = getActivationCode(email.toLowerCase());
 
-            String body = configManager.getRenewActivationCodeBody() + activationCode;
+            String body = configManager.getRenewActivationCodeBody().replace("_ACTIVATION_CODE_", activationCode);
+
             sendMail(email.toLowerCase(), configManager.getRenewActivationCodeSubject(), body);
 
         } catch (AddressException e) {
@@ -497,7 +498,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt.executeUpdate();
 
             // Invitation email
-            String body = configManager.getInvitationBody() + " " + fromEmail.toLowerCase();
+            String body = configManager.getRenewActivationCodeBody().replace("_INVITE_FROM_", fromEmail.toLowerCase());
             sendMail(toEmail.toLowerCase(), configManager.getInvitationSubject(), body);
 
         } catch (AddressException e) {
