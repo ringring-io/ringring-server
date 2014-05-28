@@ -470,7 +470,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
                 throw new EmailAlreadyRegisteredException();
 
             // Select when the last invite sent to this email
-            PreparedStatement query = connection.prepareStatement("SELECT COALESCE(EXTRACT(MINUTE FROM (CURRENT_TIMESTAMP - MAX(created_at))),0) FROM zirgoo_invites WHERE invite_to = LOWER(?)");
+            PreparedStatement query = connection.prepareStatement("SELECT COALESCE(EXTRACT(MINUTE FROM (CURRENT_TIMESTAMP - MAX(created_at))),-1) FROM zirgoo_invites WHERE invite_to = LOWER(?)");
             query.clearParameters();
             query.setString(1, toEmail);
 
@@ -479,7 +479,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
                 minutesSinceLastInviteSent = rs.getInt(1);
             }
 
-            if(minutesSinceLastInviteSent < configManager.getInvitationLimit())
+            if(minutesSinceLastInviteSent != -1 && minutesSinceLastInviteSent < configManager.getInvitationLimit())
                 throw new InvitationLimitNotExceededException();
 
             // Insert into directory table
