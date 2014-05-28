@@ -28,12 +28,13 @@ public class JDBCPooledConnectionManager implements ConnectionManager {
     @Override
     public Connection getConnection() {
 
-        if (connectionPool == null)
-            setUpConnectionPool();
-
         try {
+            if (connectionPool == null)
+                setUpConnectionPool();
+
             return connectionPool.getConnection();
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Unable to create new connection", e);
         }
     }

@@ -43,6 +43,9 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     private String activationCodeSubject;
     private String activationCodeBody;
 
+    private String invitationSubject;
+    private String invitationBody;
+
     private String renewActivationCodeSubject;
     private String renewActivationCodeBody;
 
@@ -86,6 +89,10 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
 
             activationCodeSubject = properties.getProperty("mail.activationcode.subject");
             activationCodeBody = properties.getProperty("mail.activationcode.body");
+
+            invitationSubject = properties.getProperty("mail.invitation.subject");
+            invitationBody = properties.getProperty("mail.invitation.body");
+
             renewActivationCodeSubject = properties.getProperty("mail.renewactivationcode.subject");
             renewActivationCodeBody = properties.getProperty("mail.renewactivationcode.body");
 
@@ -178,6 +185,12 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
     public String getActivationCodeBody() { return activationCodeBody; }
 
     @Override
+    public String getInvitationSubject() { return invitationSubject; }
+
+    @Override
+    public String getInvitationBody() { return invitationBody; }
+
+    @Override
     public String getRenewActivationCodeSubject() { return renewActivationCodeSubject; }
 
     @Override
@@ -211,6 +224,8 @@ public class PropertiesConfigManagerImpl implements ConfigManager {
                 + ",smtp.realname=" + smtpRealname + '\n'
                 + ",mail.activationcode.subject=" + activationCodeSubject + '\n'
                 + ",mail.activationcode.body=" + activationCodeBody + '\n'
+                + ",mail.invitation.subject=" + invitationSubject + '\n'
+                + ",mail.invitation.body=" + invitationBody + '\n'
                 + ",mail.renewactivationcode.subject=" + renewActivationCodeSubject + '\n'
                 + ",mail.renewactivationcode.body=" + renewActivationCodeBody + '\n'
                 + ",misc.activationcode.length=" + activationCodeLength + '\n'

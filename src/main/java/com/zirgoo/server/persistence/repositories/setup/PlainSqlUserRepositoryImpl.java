@@ -12,10 +12,7 @@ import javax.mail.internet.AddressException;
 import com.zirgoo.core.User;
 
 import com.google.inject.Inject;
-import com.zirgoo.core.exceptions.InvalidActivationCodeException;
-import com.zirgoo.core.exceptions.MailException;
-import com.zirgoo.core.exceptions.UserAlreadyActivatedException;
-import com.zirgoo.core.exceptions.UserNotFoundException;
+import com.zirgoo.core.exceptions.*;
 import com.zirgoo.core.exceptions.MailException;
 import com.zirgoo.server.config.ConfigManager;
 import com.zirgoo.server.config.setup.PropertiesConfigManagerImpl;
@@ -123,6 +120,23 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt.execute();
 
             stmt = connection.prepareStatement("TRUNCATE TABLE dialplan_actions");
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException();
+            }
+        }
+    }
+
+    @Override
+    public void dropInvites() {
+        Connection connection = connectionManager.getConnection();
+        try {
+            PreparedStatement stmt = connection.prepareStatement("TRUNCATE TABLE zirgoo_invites");
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -251,7 +265,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             // Catch Unique constratin violation
             if (e.getSQLState().equals("23505"))
-                throw new SQLIntegrityConstraintViolationException();
+                throw new EmailAlreadyRegisteredException();
 
             e.printStackTrace();
             throw new SQLException(e);
@@ -425,7 +439,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             String activationCode = getActivationCode(email.toLowerCase());
 
             String body = configManager.getRenewActivationCodeBody() + activationCode;
-            sendMail(email.toLowerCase(), configManager.getActivationCodeSubject(), body);
+            sendMail(email.toLowerCase(), configManager.getRenewActivationCodeSubject(), body);
 
         } catch (AddressException e) {
             throw new AddressException();
@@ -433,6 +447,52 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             e.printStackTrace();
 
             throw new MailException(e);
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            throw new SQLException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException();
+            }
+        }
+    }
+
+    @Override
+    public void invite(String fromEmail, String toEmail) throws Exception {
+        Connection connection = connectionManager.getConnection();
+        try {
+            if(!isValidEmailAddress(fromEmail) || !isValidEmailAddress(toEmail))
+                throw new AddressException();
+
+            if(getUser(fromEmail, false) == null)
+                throw new UserNotFoundException();
+
+            if(getUser(toEmail, false) != null)
+                throw new EmailAlreadyRegisteredException();
+
+            // Insert into directory table
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO zirgoo_invites (invite_from, invite_to) VALUES (LOWER(?), LOWER(?))");
+            stmt.clearParameters();
+            stmt.setString(1, fromEmail.toLowerCase());
+            stmt.setString(2, toEmail.toLowerCase());
+
+            stmt.executeUpdate();
+
+            // Invitation email
+            String body = configManager.getInvitationBody() + " " + fromEmail.toLowerCase();
+            sendMail(toEmail.toLowerCase(), configManager.getInvitationSubject(), body);
+
+        } catch (AddressException e) {
+            throw new AddressException();
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException();
+        } catch (EmailAlreadyRegisteredException e) {
+            throw new EmailAlreadyRegisteredException();
+        } catch (InvitationLimitExceededException e) {
+            throw new InvitationLimitExceededException();
         } catch (SQLException e) {
             e.printStackTrace();
 

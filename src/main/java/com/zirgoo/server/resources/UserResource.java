@@ -5,7 +5,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import com.google.inject.Inject;
@@ -15,11 +14,7 @@ import com.zirgoo.core.StatusResult;
 import com.zirgoo.core.User;
 import com.zirgoo.core.UserResult;
 import com.zirgoo.core.UserListResult;
-import com.zirgoo.core.exceptions.BadRequestException;
-import com.zirgoo.core.exceptions.InvalidActivationCodeException;
-import com.zirgoo.core.exceptions.MailException;
-import com.zirgoo.core.exceptions.UserAlreadyActivatedException;
-import com.zirgoo.core.exceptions.UserNotFoundException;
+import com.zirgoo.core.exceptions.*;
 import com.zirgoo.server.persistence.repositories.UserRepository;
 
 /**
@@ -96,7 +91,7 @@ public class UserResource {
         }
         catch (BadRequestException e) { status = Status.BAD_REQUEST; }
         catch (AddressException e) { status = Status.INVALID_EMAIL; }
-        catch (SQLIntegrityConstraintViolationException e) { status = Status.EMAIL_ALREADY_REGISTERED; }
+        catch (EmailAlreadyRegisteredException e) { status = Status.EMAIL_ALREADY_REGISTERED; }
         catch (MailException e) { status = Status.INTERNAL_SMTP_ERROR; }
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
@@ -139,6 +134,38 @@ public class UserResource {
         }
         catch (AddressException e) { status = Status.INVALID_EMAIL; }
         catch (MailException e) { status = Status.INTERNAL_SMTP_ERROR; }
+        catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
+        catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
+
+        return new StatusResult(status);
+    }
+
+    @POST
+    @Path("/{email}/invite")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public StatusResult invite(HashMap<String, String> requestHash, @PathParam("email") String email) {
+        Status status = Status.OKAY;
+
+        try {
+            String fromEmail = requestHash.get("from_email");
+            String toEmail = requestHash.get("to_email");
+
+            if (fromEmail == null || toEmail == null) {
+                throw new BadRequestException();
+            }
+
+            if (!toEmail.equals(email)) {
+                return new StatusResult(Status.INVALID_EMAIL);
+            }
+
+            userRepository.invite(fromEmail, toEmail);
+        }
+        catch (BadRequestException e) { status = Status.BAD_REQUEST; }
+        catch (AddressException e) { status = Status.INVALID_EMAIL; }
+        catch (UserNotFoundException e) { status = Status.USER_NOT_FOUND; }
+        catch (EmailAlreadyRegisteredException e) { status = Status.EMAIL_ALREADY_REGISTERED; }
+        catch (InvitationLimitExceededException e) { status = Status.INVITATION_LIMIT_EXCEEDED; }
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
 

@@ -38,6 +38,7 @@ import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * Created by kosztope on 27/01/14.
@@ -79,6 +80,7 @@ public class UserRepositoryTest {
     @Before
     public void cleanDatabase() throws Exception {
         userRepository.dropUsers();
+        userRepository.dropInvites();
     }
 
     @Test
@@ -474,6 +476,130 @@ public class UserRepositoryTest {
     }
 
     @Test
+    public void shouldInviteUser() throws Exception {
+        String fromEmail = "test.user.1@test.com";
+        String toEmail = "test.user.2@test.com";
+
+        Client client = createClient();
+        WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
+
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", fromEmail);
+
+        // First email registration
+        UserResult userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(UserResult.class, requestHash);
+        assertEquals(Status.OKAY, userResult.getStatus());
+        assertNotNull(userResult.getUser());
+
+        // Invit an other user
+        HashMap<String, String> inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", fromEmail);
+        inviteRequestHash.put("to_email", toEmail);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + toEmail + "/invite");
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.OKAY, statusResult.getStatus());
+
+        // Check if email sent to the user
+        MimeMessage message = getLastMail().getMimeMessage();
+        assertEquals(configManager.getSmtpFrom(), message.getFrom()[0].toString());
+        assertEquals(toEmail, message.getRecipients(Message.RecipientType.TO)[0].toString());
+    }
+
+    @Test
+    public void shouldNotInviteUser() throws Exception {
+        String from_email = "test.user.1@test.com";
+        String from_email_invalid = "test.user.1.invalid.email.com";
+        String to_email = "test.user.2@test.com";
+        String to_email_invalid = "test.user.2.invalid.email.com";
+
+        Client client = createClient();
+        WebResource webResource = client.resource(zirgooServerApi.getUrl() + "/user");
+
+        // Create request hash with email address
+        HashMap<String, String> requestHash = new HashMap<String, String>();
+        requestHash.put("email", from_email);
+
+        // First email registration
+        UserResult userResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(UserResult.class, requestHash);
+        assertEquals(Status.OKAY, userResult.getStatus());
+        assertNotNull(userResult.getUser());
+
+        // Invite with wrong key without to_email
+        HashMap<String, String> inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", from_email);
+        inviteRequestHash.put("from_email", from_email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + to_email + "/invite");
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.BAD_REQUEST, statusResult.getStatus());
+
+        // Invite with invalid to_email key
+        inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", from_email);
+        inviteRequestHash.put("to_email", from_email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + to_email + "/invite");
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.INVALID_EMAIL, statusResult.getStatus());
+
+        // Invite with invalid email_from address
+        inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", from_email_invalid);
+        inviteRequestHash.put("to_email", to_email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + to_email + "/invite");
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.INVALID_EMAIL, statusResult.getStatus());
+
+        // Invite with invalid email_to address
+        inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", from_email);
+        inviteRequestHash.put("to_email", to_email_invalid);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + to_email_invalid + "/invite");
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.INVALID_EMAIL, statusResult.getStatus());
+
+        // Invite with unregistered user
+        inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", to_email);
+        inviteRequestHash.put("to_email", from_email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + from_email + "/invite");
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.USER_NOT_FOUND, statusResult.getStatus());
+
+        // Invite already registered email
+        inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("from_email", from_email);
+        inviteRequestHash.put("to_email", from_email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + from_email + "/invite");
+        statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.EMAIL_ALREADY_REGISTERED, statusResult.getStatus());
+    }
+
+    @Test
     public void shouldBadRequest() throws Exception {
         String email = "test.user.1@test.com";
 
@@ -508,6 +634,17 @@ public class UserRepositoryTest {
                 .post(UserListResult.class, emailsRequestHash);
         assertEquals(Status.BAD_REQUEST, userListResult.getStatus());
         assertNull(userListResult.getUsers());
+
+        // Invite email with wrong key
+        HashMap<String, String> inviteRequestHash = new HashMap<String, String>();
+        inviteRequestHash.put("email_wrong_key", email);
+        inviteRequestHash.put("to_email", email);
+
+        webResource = client.resource(zirgooServerApi.getUrl() + "/user/" + email + "/invite");
+        StatusResult statusResult = webResource.type(MediaType.APPLICATION_JSON_TYPE)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(StatusResult.class, inviteRequestHash);
+        assertEquals(Status.BAD_REQUEST, statusResult.getStatus());
     }
 
     private Client createClient() {

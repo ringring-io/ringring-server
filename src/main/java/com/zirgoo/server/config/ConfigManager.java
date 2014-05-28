@@ -37,6 +37,9 @@ public interface ConfigManager {
     String getActivationCodeSubject();
     String getActivationCodeBody();
 
+    String getInvitationSubject();
+    String getInvitationBody();
+
     String getRenewActivationCodeSubject();
     String getRenewActivationCodeBody();
 
