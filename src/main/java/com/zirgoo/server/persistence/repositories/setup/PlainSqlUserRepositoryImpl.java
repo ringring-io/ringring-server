@@ -1,11 +1,9 @@
 package com.zirgoo.server.persistence.repositories.setup;
 
-import java.net.URLEncoder;
 import java.sql.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.AddressException;
@@ -15,18 +13,13 @@ import com.google.inject.Inject;
 import com.zirgoo.core.exceptions.*;
 import com.zirgoo.core.exceptions.MailException;
 import com.zirgoo.server.config.ConfigManager;
-import com.zirgoo.server.config.setup.PropertiesConfigManagerImpl;
 import com.zirgoo.server.persistence.ConnectionManager;
 import com.zirgoo.server.persistence.repositories.UserRepository;
-
-import org.postgresql.util.PSQLException;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
@@ -486,8 +479,8 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
                 minutesSinceLastInviteSent = rs.getInt(1);
             }
 
-            if(minutesSinceLastInviteSent > configManager.getInvitationLimit())
-                throw new InvitationLimitExceededException();
+            if(minutesSinceLastInviteSent < configManager.getInvitationLimit())
+                throw new InvitationLimitNotExceededException();
 
             // Insert into directory table
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO zirgoo_invites (invite_from, invite_to) VALUES (LOWER(?), LOWER(?))");
@@ -507,8 +500,8 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             throw new UserNotFoundException();
         } catch (EmailAlreadyRegisteredException e) {
             throw new EmailAlreadyRegisteredException();
-        } catch (InvitationLimitExceededException e) {
-            throw new InvitationLimitExceededException();
+        } catch (InvitationLimitNotExceededException e) {
+            throw new InvitationLimitNotExceededException();
         } catch (SQLException e) {
             e.printStackTrace();
 

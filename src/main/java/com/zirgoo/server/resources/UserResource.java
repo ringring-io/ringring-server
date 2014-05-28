@@ -165,7 +165,7 @@ public class UserResource {
         catch (AddressException e) { status = Status.INVALID_EMAIL; }
         catch (UserNotFoundException e) { status = Status.USER_NOT_FOUND; }
         catch (EmailAlreadyRegisteredException e) { status = Status.EMAIL_ALREADY_REGISTERED; }
-        catch (InvitationLimitExceededException e) { status = Status.INVITATION_LIMIT_EXCEEDED; }
+        catch (InvitationLimitNotExceededException e) { status = Status.INVITATION_LIMIT_NOT_EXCEEDED; }
         catch (SQLException e) { status = Status.INTERNAL_DATABASE_ERROR; }
         catch (Exception e) { status = Status.INTERNAL_APPLICATION_ERROR; }
 
