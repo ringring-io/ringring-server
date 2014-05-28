@@ -498,7 +498,7 @@ public class PlainSqlUserRepositoryImpl implements UserRepository {
             stmt.executeUpdate();
 
             // Invitation email
-            String body = configManager.getRenewActivationCodeBody().replace("_INVITE_FROM_", fromEmail.toLowerCase());
+            String body = configManager.getInvitationBody().replace("_INVITE_FROM_", fromEmail.toLowerCase());
             sendMail(toEmail.toLowerCase(), configManager.getInvitationSubject(), body);
 
         } catch (AddressException e) {
