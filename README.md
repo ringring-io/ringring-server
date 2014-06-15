@@ -1,6 +1,4 @@
 [![Build Status](https://travis-ci.org/ringring-io/ringring-server.png)](https://travis-ci.org/ringring-io/ringring-server)
-zirgoo-server
-=============
 
 # Ringring RESTful backend #
 
