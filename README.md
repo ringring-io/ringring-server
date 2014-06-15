@@ -1,8 +1,10 @@
-[![Build Status](https://travis-ci.org/zirgoo/zirgoo-server.png)](https://travis-ci.org/zirgoo/zirgoo-server)
+[![Build Status](https://travis-ci.org/ringring-io/ringring-server.png)](https://travis-ci.org/ringring-io/ringring-server)
 zirgoo-server
 =============
 
-RESTful backend
+# Ringring RESTful backend #
+
+Ringring is a Phone and Messaging application built for privacy with open architectures. You can originate calls and send messages in an easy and secured way with no data-collecting man or company in the middle. The technology is freely available for public.
 
 To run app:
 
