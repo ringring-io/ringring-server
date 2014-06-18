@@ -56,7 +56,7 @@ CREATE TABLE dialplan_actions (
 
 CREATE TABLE directory (
    id                 SERIAL
-  ,zirgoo_user_id     INTEGER DEFAULT NULL
+  ,ringring_user_id   INTEGER DEFAULT NULL
   ,username           VARCHAR(255) NOT NULL
   ,domain             VARCHAR(255) NOT NULL
   ,domain_id          INTEGER DEFAULT NULL

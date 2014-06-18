@@ -1,14 +1,14 @@
 [![Build Status](https://travis-ci.org/ringring-io/ringring-server.png)](https://travis-ci.org/ringring-io/ringring-server)
 
-# Ringring RESTful backend #
+# Ringring.io RESTful backend #
 
 Ringring is a Phone and Messaging application built for privacy with open architectures. You can originate calls and send messages in an easy and secured way with no data-collecting man or company in the middle. The technology is freely available for public.
 
 To run app:
 
-    mvn clean compile exec:java -Dexec.mainClass=com.zirgoo.server.Main
+    mvn clean compile exec:java -Dexec.mainClass=io.ringring.server.Main
 
-The application will automaticly set up and migrate the database to the latest version if required.    
+The application will automatically set up and migrate the database to the latest version if required.
 
 To test that it's working go to:
 
